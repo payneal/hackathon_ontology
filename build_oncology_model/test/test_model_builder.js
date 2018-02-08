@@ -31,15 +31,76 @@ describe("Building a model for ontology", function() {
     it('enter entry node when empty data', function() {
         var x = builder.create_model();
         builder.set_ontology_mode("ODP");
-        builder.add_first_node("Physiotherapy Center");
+        builder.add_node("ingredients_to_batter");
         
+        expect(builder.model_rep).to.eql(
+            {
+                "ingredients_to_batter":{
+                    "links": [],
+                    "connected_nodes": []
+                }
+            }
+        );
+
+        builder.add_link("ingredients_to_batter", "Type", 
+            "MaterialTransformation");    
+
+        expect(builder.model_rep).to.eql(
+            {
+                "ingredients_to_batter":{
+                    "links": ["Type"],
+                    "connected_nodes": ["MaterialTransformation"]
+                },
+                "MaterialTransformation": {
+                    "links":[],
+                    "connected_nodes": []
+                }   
+            }
+        );
+
+        builder.add_link("ingredients_to_batter", "hasOutput", 
+            "cake_batter");    
+
+        builder.add_link("ingredients_to_batter", "occursDurring",
+            "time");
+
+        builder.add_link(
+            "ingredients_to_batter",
+            "occursInNeighborhood", 
+            "kitchen");
+        
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "sugar");
+
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "flour");
+
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "butter");
+          
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "backing_powder");
+
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "milk");
+
+        builder.add_link(
+            "ingredients_to_batter",
+            "hasInput", 
+            "egg");
+
+        console.log("" + JSON.stringify(builder.model_rep, null, 4));
+
+
     });
-
-
-
-
-
-    
-
-
 });
