@@ -2,7 +2,7 @@ const chai = require('chai');
 const expect = chai.expect;
 
 const Builder = require('../index');
-const builder = new Builder();
+var builder = new Builder();
 
 describe("Building a model for ontology", function() {
 
@@ -36,8 +36,8 @@ describe("Building a model for ontology", function() {
         expect(builder.model_rep).to.eql(
             {
                 "ingredients_to_batter":{
-                    "links": [],
-                    "connected_nodes": []
+                    "id": 1,
+                    "connection": []
                 }
             }
         );
@@ -47,49 +47,92 @@ describe("Building a model for ontology", function() {
 
         expect(builder.model_rep).to.eql(
             {
-                "ingredients_to_batter":{
-                    "links": ["Type"],
-                    "connected_nodes": ["MaterialTransformation"]
-                },
-                "MaterialTransformation": {
-                    "links":[],
-                    "connected_nodes": []
-                }   
+               "ingredients_to_batter":{
+                    "id": 1,
+                    "connection": [{
+                        "label": "MaterialTransformation",
+                        "connectionInfo": "Type"
+                    }]
+               },
+                "MaterialTransformation":{
+                    "id": 2,
+                    "connection": []
+                }
             }
         );
 
-        builder.add_link("ingredients_to_batter", "hasOutput", 
-            "cake_batter");    
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"}
+            ]
+        );
 
-        builder.add_link("ingredients_to_batter", "occursDurring",
-            "time");
+        
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"}
+            ] 
+        );
+    
+        
+        builder.add_link("ingredients_to_batter", "hasOutput", "cake_batter");    
 
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+                {id: 3, label: "cake_batter"},
+            ]
+        );
+
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"},
+                {label:"hasOutput", from:1, to: 3}
+            ] 
+        );
+   
+        builder.add_link("ingredients_to_batter", "occursDurring","time");
+
+        
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+                {id: 3, label: "cake_batter"},
+                {id:4, label: "time"}
+            ]
+        );
+
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"},
+                {from:1, to: 3, label: "hasOutput"},
+                {from: 1, to: 4, label: "occursDurring"}
+            ] 
+        );
+   
         builder.add_link(
             "ingredients_to_batter",
             "occursInNeighborhood", 
             "kitchen");
-        
+
         builder.add_link(
-            "ingredients_to_batter",
-            "hasInput", 
+            "ingredients_to_batter", "hasInput", 
             "sugar");
 
         builder.add_link(
-            "ingredients_to_batter",
-            "hasInput", 
+            "ingredients_to_batter", "hasInput", 
             "flour");
 
-        builder.add_link(
-            "ingredients_to_batter",
-            "hasInput", 
+        builder.add_link("ingredients_to_batter", "hasInput", 
             "butter");
-          
-        builder.add_link(
-            "ingredients_to_batter",
-            "hasInput", 
-            "backing_powder");
+    
+        builder.add_link("ingredients_to_batter",
+            "hasInput", "backing_powder");
 
-        builder.add_link(
+              builder.add_link(
             "ingredients_to_batter",
             "hasInput", 
             "milk");
@@ -97,10 +140,111 @@ describe("Building a model for ontology", function() {
         builder.add_link(
             "ingredients_to_batter",
             "hasInput", 
-            "egg");
+             "egg");
 
-        console.log("" + JSON.stringify(builder.model_rep, null, 4));
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+                {id: 3, label: "cake_batter"},
+                {id: 4, label: "time"},
+                {id: 5, label: "kitchen"},
+                {id: 6, label: "sugar"},
+                {id: 7, label: "flour"},
+                {id: 8, label: "butter"},
+                {id: 9, label: "backing_powder"},
+                {id: 10, label: "milk"},
+                {id: 11, label: "egg"}
+            ]
+        );
 
-
+        expect(builder.get_graph_connections()).to.eql(
+           [
+                {from: 1, to: 2, label: "Type"},
+                {from: 1, to: 3, label: "hasOutput"},
+                {from: 1, to: 4, label: "occursDurring"},
+                {from: 1, to: 5, label: "occursInNeighborhood"},
+                {from: 1, to: 6, label: "hasInput"},
+                {from: 1, to: 7, label: "hasInput"},
+                {from: 1, to: 8, label: "hasInput"},
+                {from: 1, to: 9, label: "hasInput"},
+                {from: 1, to: 10, label: "hasInput"},
+                {from: 1, to: 11, label: "hasInput"}
+           ] 
+        );
     });
+
+    it('go to 3rd level', function() {
+        builder = new Builder();
+        var x = builder.create_model();
+        builder.set_ontology_mode("ODP");
+        builder.add_node("ingredients_to_batter");
+
+        expect(builder.model_rep).to.eql(
+            {"ingredients_to_batter":{
+                "id": 1,
+                "connection": []}
+            }
+        );
+
+        builder.add_link("ingredients_to_batter", "Type", 
+            "MaterialTransformation");
+
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+            ]
+        );
+
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"},
+            ] 
+        );
+
+        builder.add_link(
+            "ingredients_to_batter", "hasOutput", "cake_batter");    
+
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+                {id: 3, label: "cake_batter"},
+            ]
+        );
+
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"},
+                {label:"hasOutput", from:1, to: 3}
+            ] 
+        );
+
+        builder.add_link("cake_batter", "Type", "input");    
+
+        expect(builder.get_graph_nodes()).to.eql(
+            [
+                {id: 1, label: "ingredients_to_batter"},
+                {id: 2, label: "MaterialTransformation"},
+                {id: 3, label: "cake_batter"},
+                {id: 4, label: "input"}
+            ]
+        );
+
+        expect(builder.get_graph_connections()).to.eql(
+            [
+                {from: 1, to: 2, label: "Type"},
+                {from: 1, to: 3, label: "hasOutput"},
+                {from: 3, to: 4, label: "Type"}
+            ] 
+        );
+
+        //console.log(" here is nodes" + JSON.stringify(
+        //    builder.get_graph_nodes()));
+
+        //console.log(" here is connections " + JSON.stringify(
+        //    builder.get_graph_connections()));
+    });
+    
 });

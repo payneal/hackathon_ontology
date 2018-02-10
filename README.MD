@@ -28,3 +28,17 @@
 
 ## graph = 
 * https://github.com/arago/hiro-graph-js
+
+
+# the nodes ex format
+[
+    {id: 1, label: "nam "},
+    {id: 1, label: "nam "},
+    {id: 1, label: "nam "},
+]
+
+# connectiuons example format
+[
+    {from: 454, to: 2, label: "label name", font: { align: 'horizontal'}, arrows:"to"},
+    {from: 454, to: 2, label: "label name", font: { align: 'horizontal'}, arrows:"to"}
+]
